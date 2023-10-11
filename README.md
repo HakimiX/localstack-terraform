@@ -52,7 +52,7 @@ terraform apply
 
 #### Stopping the containers
 
-:warning LocalStack resources will be destroyed. 
+:warning: LocalStack resources will be destroyed. 
 ```bash
 docker compose -f docker-compose.localstack.yml down
 ```
