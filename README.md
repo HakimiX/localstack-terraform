@@ -2,6 +2,15 @@
 
 Sample terraform project to deploy AWS resources to localstack. 
 
+- [LocalStack Terraform](#localstack-terraform)
+  - [Prerequisites](#prerequisites)
+  - [Setup](#setup)
+  - [AWS CLI with LocalStack](#aws-cli-with-localstack)
+      - [List queues](#list-queues)
+      - [Send messages](#send-messages)
+      - [Purge queue](#purge-queue)
+
+
 ## Prerequisites
 
 * [Docker](https://docs.docker.com/install/)
@@ -13,23 +22,65 @@ Sample terraform project to deploy AWS resources to localstack.
 
 The docker-compose file will start LocalStack and a Postgres database.
 
-1. Start localstack
+1. Run `docker-compose up` to start LocalStack and Postgres
 
-    ```bash
-    TMPDIR=/private$TMPDIR docker-compose up
-    ```
+```bash
+docker compose -f docker-compose.localstack.yml up
+```
+
+![](resources/images/localstack-containers.png)
+
+2. Run `terraform init` to initialize the terraform project
+
+```bash
+terraform init
+```
+3. Run `terraform plan` to see the resources that will be created
+
+```bash
+terraform plan
+```
+4. Run `terraform apply` to create the resources
+
+```bash
+terraform apply
+```
+
+![](resources/images/terraform-apply.png)
 
 
 ## AWS CLI with LocalStack
+Use the AWS CLI to interact with the resources created in LocalStack.
 
-SQS commands: 
+#### List queues
+
 ```bash
-# list queues 
 aws --endpoint-url=http://localhost:4566 sqs list-queues
 
-# send message to queue
-aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url <queue-url>  --message-body "Hello World"
+```
+```json
+{
+    "QueueUrls": [
+        "http://localhost:4566/000000000000/my-simple-queue"
+    ]
+}
+```
+#### Send messages
 
-# purge queue 
-aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url <queue-url>
+```bash
+aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url http://localhost:4566/000000000000/my-simple-queue --message-body "Hello World"
+```
+```json
+{
+    "MD5OfMessageBody": "6f5902ac237024bdd0c176cb93063dc4",
+    "MessageId": "a1b2c3d4-5678-90ab-cdef-11111EXAMPLE"
+}
+```
+#### Purge queue
+
+```bash
+aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/000000000000/my-simple-queue
+```
+```json
+{}
 ```
