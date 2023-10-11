@@ -33,6 +33,7 @@ docker compose -f docker-compose.localstack.yml up
 2. Run `terraform init` to initialize the terraform project
 
 ```bash
+cd iac
 terraform init
 ```
 3. Run `terraform plan` to see the resources that will be created
