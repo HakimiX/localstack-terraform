@@ -5,6 +5,7 @@ Sample terraform project to deploy AWS resources to localstack.
 - [LocalStack Terraform](#localstack-terraform)
   - [Prerequisites](#prerequisites)
   - [Setup](#setup)
+      - [Stopping the containers](#stopping-the-containers)
   - [AWS CLI with LocalStack](#aws-cli-with-localstack)
       - [List queues](#list-queues)
       - [Send messages](#send-messages)
@@ -49,6 +50,12 @@ terraform apply
 
 ![](resources/images/terraform-apply.png)
 
+#### Stopping the containers
+
+LocalStack resources will be destroyed. 
+```bash
+docker compose -f docker-compose.localstack.yml down
+```
 
 ## AWS CLI with LocalStack
 Use the AWS CLI to interact with the resources created in LocalStack.
