@@ -62,24 +62,31 @@ docker compose -f docker-compose.localstack.yml down
 ## AWS CLI with LocalStack
 Use the AWS CLI to interact with the resources created in LocalStack.
 
+**SQS**
 ```shell
 # list-queues
 aws --endpoint-url=http://localhost:4566 sqs list-queues
-
-# list-topics
-aws --endpoint-url=http://localhost:4566 sns list-topics
-
-# list-functions
-aws --endpoint-url=http://localhost:4566 lambda list-functions
-
-# Publish message on SNS topic
-aws --endpoint-url=http://localhost:4566 logs get-log-events --log-group-name /aws/lambda/your-lambda-function-name --log-stream-name your-log-stream-name-from-previous-command
 
 # Send SQS messages
 aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url http://localhost:4566/000000000000/my-simple-queue --message-body "Hello World"
 
 # Purge SQS queue
 aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/000000000000/my-simple-queue
+```
+
+**topics**
+```shell
+# list-topics
+aws --endpoint-url=http://localhost:4566 sns list-topics
+
+# publish message
+aws --endpoint-url=http://localhost:4566 sns publish --topic-arn YOUR_SNS_TOPIC_ARN --message "Your message content here"
+```
+
+**lambda**
+```shell
+# list-functions
+aws --endpoint-url=http://localhost:4566 lambda list-functions
 ```
 
 ### See lambda logs 
