@@ -121,7 +121,7 @@ aws --endpoint-url=http://localhost:4566 logs get-log-events --log-group-name /a
     },
 }
 ```
-
+> You must use single quotes when specifying `--log-stream-name`, i.e. `'2023/10/24/[$LATEST]f70bcaaf487f9437979a940aeadae856'`
 
 ## Troubleshoot
 
