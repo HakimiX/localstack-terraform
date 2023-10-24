@@ -68,10 +68,13 @@ Use the AWS CLI to interact with the resources created in LocalStack.
 aws --endpoint-url=http://localhost:4566 sqs list-queues
 
 # Send SQS messages
-aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url http://localhost:4566/000000000000/my-simple-queue --message-body "Hello World"
+aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url <queue-url> --message-body "Hello World"
+
+# receive messages
+aws --endpoint-url=http://localhost:4566 sqs receive-message --queue-url  <queue-url> --max-number-of-messages 10
 
 # Purge SQS queue
-aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/000000000000/my-simple-queue
+aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url <queue-url>
 ```
 
 **topics**
@@ -79,8 +82,11 @@ aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://loca
 # list-topics
 aws --endpoint-url=http://localhost:4566 sns list-topics
 
+# list-subscriptions
+aws --endpoint-url=http://localhost:4566 sns list-subscriptions-by-topic --topic-arn <topic-arn>
+
 # publish message
-aws --endpoint-url=http://localhost:4566 sns publish --topic-arn YOUR_SNS_TOPIC_ARN --message "Your message content here"
+aws --endpoint-url=http://localhost:4566 sns publish --topic-arn <topic-arn> --message "Your message content here"
 ```
 
 **lambda**

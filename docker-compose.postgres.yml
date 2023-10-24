@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  localstack_postgres:
+    container_name: localstack_postgres_container
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      # Any .sql, .sh, .sql.gz files in the /docker-entrypoint-initdb.d directory will be automatically executed in alphabetical order when the container starts up for the first time.
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  postgres: # Define the network here
+    driver: bridge
+
+volumes:
+  postgres:
