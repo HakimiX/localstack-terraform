@@ -9,6 +9,8 @@ Sample terraform project to deploy AWS resources to localstack.
   - [AWS CLI with LocalStack](#aws-cli-with-localstack)
     - [See lambda logs](#see-lambda-logs)
   - [Troubleshoot](#troubleshoot)
+      - [InvalidClientTokenId](#invalidclienttokenid)
+      - [(ResourceNotFoundException) when calling the GetLogEvents operation](#resourcenotfoundexception-when-calling-the-getlogevents-operation)
     - [Sources](#sources)
 
 
@@ -123,7 +125,7 @@ aws --endpoint-url=http://localhost:4566 logs get-log-events --log-group-name /a
 
 ## Troubleshoot
 
-**InvalidClientTokenId**
+#### InvalidClientTokenId
 ```shell
 Error: reading SQS Queue (http://localhost:4566/000000000000/sample-queue): InvalidClientTokenId: The security token included  in the request is invalid.
   status code: 403, request id: a60820d0-edb9-5681-8b43-7d61785b1da1
@@ -143,6 +145,28 @@ provider "aws" {
   }
 }
 ```
+
+#### (ResourceNotFoundException) when calling the GetLogEvents operation
+```shell
+An error occurred (ResourceNotFoundException) when calling the GetLogEvents operation: The specified log group does not exist
+```
+Solution: 
+1. Ensure the Log Group Exists: <br>
+Before trying to fetch logs from a specific stream, make sure the log group exists. You can list all available log groups in LocalStack:
+```shell
+aws --endpoint-url=http://localhost:4566 logs describe-log-groups
+```
+If `/aws/lambda/example_lambda` is not listed, then you'll need to create it first.
+2. Create the Log Group (if it doesn't exist):
+```shell
+aws --endpoint-url=http://localhost:4566 logs create-log-group --log-group-name /aws/lambda/example_lambda
+```
+3. Ensure the Log Stream Exists:<br>
+After confirming or creating the log group, check if the log stream you're trying to fetch logs from exists:
+```shell
+aws --endpoint-url=http://localhost:4566 logs describe-log-streams --log-group-name /aws/lambda/example_lambda
+```
+This will list all log streams within the specified log group. Ensure your log stream `2023/10/24/[$LATEST]f70bcaaf487f9437979a940aeadae856`` is listed.
 
 ### Sources
 
