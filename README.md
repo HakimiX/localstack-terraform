@@ -7,9 +7,9 @@ Sample terraform project to deploy AWS resources to localstack.
   - [Setup](#setup)
       - [Stopping the containers](#stopping-the-containers)
   - [AWS CLI with LocalStack](#aws-cli-with-localstack)
-      - [List queues](#list-queues)
-      - [Send messages](#send-messages)
-      - [Purge queue](#purge-queue)
+    - [See lambda logs](#see-lambda-logs)
+  - [Troubleshoot](#troubleshoot)
+    - [Sources](#sources)
 
 
 ## Prerequisites
@@ -60,35 +60,90 @@ docker compose -f docker-compose.localstack.yml down
 ## AWS CLI with LocalStack
 Use the AWS CLI to interact with the resources created in LocalStack.
 
-#### List queues
-
-```bash
+```shell
+# list-queues
 aws --endpoint-url=http://localhost:4566 sqs list-queues
 
-```
-```json
-{
-    "QueueUrls": [
-        "http://localhost:4566/000000000000/my-simple-queue"
-    ]
-}
-```
-#### Send messages
+# list-topics
+aws --endpoint-url=http://localhost:4566 sns list-topics
 
-```bash
+# list-functions
+aws --endpoint-url=http://localhost:4566 lambda list-functions
+
+# Publish message on SNS topic
+aws --endpoint-url=http://localhost:4566 logs get-log-events --log-group-name /aws/lambda/your-lambda-function-name --log-stream-name your-log-stream-name-from-previous-command
+
+# Send SQS messages
 aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url http://localhost:4566/000000000000/my-simple-queue --message-body "Hello World"
-```
-```json
-{
-    "MD5OfMessageBody": "6f5902ac237024bdd0c176cb93063dc4",
-    "MessageId": "a1b2c3d4-5678-90ab-cdef-11111EXAMPLE"
-}
-```
-#### Purge queue
 
-```bash
+# Purge SQS queue
 aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/000000000000/my-simple-queue
 ```
-```json
-{}
+
+### See lambda logs 
+In LocalStack, when a Lambda function is executed, the logs are printed directly to the console or terminal where LocalStack is running. 
+
+1. You need to create a log group first by invoking the function:
+```shell
+# Invoke function
+aws --endpoint-url=http://localhost:4566 lambda invoke --function-name <function-name> output.txt
 ```
+2. Get logstream name 
+```shell
+aws --endpoint-url=http://localhost:4566 logs describe-log-streams --log-group-name /aws/lambda/<lamda-name>
+
+# returns logstream name
+{
+  "logStreams": [
+    {
+      "logStreamName": "2023/10/24/[$LATEST]f70bcaaf487f9437979a940aeadae856",
+    }
+}
+```
+3. Get logs
+```shell
+aws --endpoint-url=http://localhost:4566 logs get-log-events --log-group-name /aws/lambda/<lambda-name> --log-stream-name '2023/10/24/[$LATEST]f70bcaaf487f9437979a940aeadae856'
+
+# returns logs 
+{
+  "events": [
+    {
+        "timestamp": 1698142320794,
+        "message": "START RequestId: 95792e66-c37a-469f-bc9c-fc6e72b427be Version: $LATEST",
+        "ingestionTime": 1698142320830
+    },
+    {
+        "timestamp": 1698142320800,
+        "message": "[ERROR] Runtime.ImportModuleError: ....",
+        "ingestionTime": 1698142320830
+    },
+}
+```
+
+
+## Troubleshoot
+
+**InvalidClientTokenId**
+```shell
+Error: reading SQS Queue (http://localhost:4566/000000000000/sample-queue): InvalidClientTokenId: The security token included  in the request is invalid.
+  status code: 403, request id: a60820d0-edb9-5681-8b43-7d61785b1da1
+  with aws_sqs_queue.sample_queue,
+  on main.tf line 26, in resource "aws_sqs_queue" "sample_queue":
+  26: resource "aws_sqs_queue" "sample_queue" {
+```
+Solution: 
+```shell
+# The error is caused by the AWS CLI not being able to authenticate with LocalStack.
+# You need to define the endpoint in the aws provider 
+
+provider "aws" {
+  endpoints {
+    sqs = "http://localhost:4566"
+    # the rest of the resource endpoints (lambda, sns, etc)
+  }
+}
+```
+
+### Sources
+
+* [aws-localstack-examples](https://gist.github.com/sats17/493d05d8d4dfd16b7dad399163075156)
